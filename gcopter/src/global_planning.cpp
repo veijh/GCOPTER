@@ -1,3 +1,4 @@
+// clang-format off
 #include "misc/visualizer.hpp"
 #include "gcopter/trajectory.hpp"
 #include "gcopter/gcopter.hpp"
@@ -19,6 +20,8 @@
 #include <memory>
 #include <chrono>
 #include <random>
+
+#include "gcopter/time_track.hpp"
 
 struct Config
 {
@@ -112,6 +115,7 @@ public:
                                  ros::TransportHints().tcpNoDelay());
     }
 
+    // Update the member voxelMap according to the PointCloud2 msg.
     inline void mapCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg)
     {
         if (!mapInitialized)
@@ -149,7 +153,7 @@ public:
                                                    startGoal[1],
                                                    voxelMap.getOrigin(),
                                                    voxelMap.getCorner(),
-                                                   &voxelMap, 0.01,
+                                                   &voxelMap, 1.0,
                                                    route);
             std::vector<Eigen::MatrixX4d> hPolys;
             std::vector<Eigen::Vector3d> pc;
@@ -250,8 +254,9 @@ public:
             {
                 ROS_WARN("Infeasible Position Selected !!!\n");
             }
-
+            TimeTrack track;
             plan();
+            track.OutputPassingTime("Planning Time");
         }
         return;
     }
